@@ -1,0 +1,23 @@
+"""
+embedding:
+  model: "openai"
+  chunk_size: 500
+  overlap: 50
+  model_name: "text-embedding-ada-002"
+
+file_types:
+  supported: [pdf, docx, xlsx, html]
+
+retrieval:
+  type: hybrid  # options: semantic, keyword, hybrid
+  top_k: 5
+
+llm:
+  model: "gpt-4o"
+  temperature: 0.7
+  max_tokens: 100000
+
+chroma:
+  collection_name: "rag_documents"
+  distance_function: "cosine"
+"""
