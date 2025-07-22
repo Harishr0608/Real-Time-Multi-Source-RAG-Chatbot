@@ -14,10 +14,10 @@ pip install -r requirements.txt
 if [ ! -f .env ]; then
     echo "Creating .env file..."
     cat > .env << EOL
-OPENAI_API_KEY="sk-svcacct-vMN3fZyJx0PUnL_9KhloMD0WZM5qypD_W9mUxR07n_IVldQXFGdMTwFCBSGDQk2iWmVu2T3BlbkFJjIyZemVl4jAdYz-vR5yRMA5MiNpFkckynt-ywztlEe_OSmkfciGs2-LFShyPCjOKJCKAA"
-CHROMADB_DIR="/Users/harishr/Desktop/RAG/home/vectorstore"
-EMBEDDING_MODEL="text-embedding-3-large"
-YOUTUBE_API_KEY="AIzaSyBNByfL278oLayLydyR_6dEojRlY7NTFWw"
+OPENAI_API_KEY=""
+CHROMADB_DIR=""
+EMBEDDING_MODEL=""
+YOUTUBE_API_KEY=""
 FASTAPI_HOST="0.0.0.0"
 FASTAPI_PORT="8000"
 STREAMLIT_PORT="8501"
