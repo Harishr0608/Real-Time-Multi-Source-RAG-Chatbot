@@ -161,9 +161,9 @@ llm:
 4. Push to the branch
 5. Create a Pull Request
 
-## 📄 License
+## 📄 Screenshot
 
-This project is licensed under the MIT License.
+<img width="1920" height="1134" alt="Screenshot 2025-07-22 at 19 01 26" src="https://github.com/user-attachments/assets/d68835f4-796b-45d5-bba1-798c893f31c1" />
 
 ## 🔗 Links
 
