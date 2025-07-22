@@ -1,4 +1,3 @@
-"""
 # 🤖 Real-Time Multi-Source RAG Chatbot
 
 A comprehensive RAG (Retrieval-Augmented Generation) chatbot that supports multiple document types and real-time embedding management using LangGraph agents, ChromaDB, FastAPI, and Streamlit.
@@ -27,7 +26,7 @@ A comprehensive RAG (Retrieval-Augmented Generation) chatbot that supports multi
 
 ## 📋 Prerequisites
 
-- Python 3.10+
+- Python 3.10.16
 - OpenAI API key
 - YouTube API key (optional, for YouTube support)
 - Docker (optional, for containerized deployment)
@@ -172,4 +171,3 @@ This project is licensed under the MIT License.
 - [ChromaDB Documentation](https://docs.trychroma.com/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Streamlit Documentation](https://docs.streamlit.io/)
-"""
