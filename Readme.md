@@ -87,6 +87,14 @@ Environment variables in `.env`:
 ```text
 # Required
 OPENAI_API_KEY=your_openai_api_key_here
+YOUTUBE_API_KEY=your-youtube-api-key-here
+
+# Disable ChromaDB telemetry completely
+ANONYMIZED_TELEMETRY=false
+CHROMA_SERVER_NOFILE=65535
+
+# Retrieval Configuration
+TOP_K=5
 
 # Optional (with defaults)
 MAX_CHUNK_TOKENS=500
@@ -95,6 +103,9 @@ LLM_MODEL=gpt-4o
 EMBED_MODEL=text-embedding-3-large
 CHROMADB_DIR=./data/vectorstore
 API_BASE_URL=http://localhost:8000/api/v1
+
+# Logging
+LOG_LEVEL=INFO
 ```
 
 ## 🏗️ Architecture
