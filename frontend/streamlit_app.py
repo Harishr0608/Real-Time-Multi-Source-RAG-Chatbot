@@ -236,10 +236,26 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             
-            # REMOVED: Sources display - only show reasoning if available
-            if message["role"] == "assistant" and "reasoning" in message and message["reasoning"]:
-                with st.expander("🧠 Reasoning Process"):
-                    st.markdown(message["reasoning"])
+            # Enhanced source display with citations
+            if message["role"] == "assistant" and "sources" in message and message["sources"]:
+                sources = message["sources"]
+                
+                # Group sources by source_id to avoid duplicates
+                unique_sources = {}
+                for source in sources:
+                    source_id = source.get('source_id', f"source_{len(unique_sources)}")
+                    if source_id not in unique_sources:
+                        unique_sources[source_id] = source
+                    else:
+                        # Keep the source with higher relevance score
+                        if source.get('relevance_score', 0) > unique_sources[source_id].get('relevance_score', 0):
+                            unique_sources[source_id] = source
+                
+                retrieved_count = len(unique_sources)
+                
+                with st.expander(f"📚 Sources ({retrieved_count} unique documents from {len(sources)} chunks)"):
+                    for i, (source_id, source) in enumerate(unique_sources.items(), 1):
+                        display_source_info(source, i)
     
     # Chat input
     if prompt := st.chat_input("Ask a question about your documents", disabled=not completed_sources):
@@ -269,13 +285,32 @@ def main():
                     assistant_message = {
                         "role": "assistant", 
                         "content": response_text,
-                        "sources": sources,  # Still store sources in case needed later
+                        "sources": sources,
                         "reasoning": reasoning
                     }
                     st.session_state.messages.append(assistant_message)
                     st.session_state.chat_history.append(assistant_message)
                     
-                    # REMOVED: Sources display - only show reasoning if available
+                    # Show sources immediately in the response
+                    if sources:
+                        # Group sources by source_id to avoid duplicates
+                        unique_sources = {}
+                        for source in sources:
+                            source_id = source.get('source_id', f"source_{len(unique_sources)}")
+                            if source_id not in unique_sources:
+                                unique_sources[source_id] = source
+                            else:
+                                # Keep the source with higher relevance score
+                                if source.get('relevance_score', 0) > unique_sources[source_id].get('relevance_score', 0):
+                                    unique_sources[source_id] = source
+                        
+                        unique_count = len(unique_sources)
+                        
+                        with st.expander(f"📚 Sources ({unique_count} unique documents from {len(sources)} chunks)"):
+                            for i, (source_id, source) in enumerate(unique_sources.items(), 1):
+                                display_source_info(source, f"current_{i}")
+                    
+                    # Show reasoning if available
                     if reasoning:
                         with st.expander("🧠 Reasoning Process"):
                             st.markdown(reasoning)
@@ -358,6 +393,54 @@ def get_source_url(source: dict) -> str:
     return ""
 
 
+def display_source_info(source, unique_key):
+    """Display source information in a consistent format"""
+    if isinstance(source, dict):
+        # Get source details
+        source_name = get_display_name(source)
+        citation_num = source.get('citation_number', unique_key)
+        source_type = source.get('type', 'Document')
+        relevance = source.get('relevance_score', 0)
+        chunk_count = source.get('chunk_count', 1)
+        preview = source.get('preview', '')
+        url = get_source_url(source)
+        
+        # Source type emoji
+        type_emoji = get_type_emoji(source)
+        
+        st.write(f"**{type_emoji} [{citation_num}] {source_name}**")
+        st.write(f"*Type:* {source_type}")
+        st.write(f"*Relevance Score:* {relevance:.2f}")
+        if chunk_count > 1:
+            st.write(f"*Chunks Used:* {chunk_count}")
+        
+        # Add download/link button for sources
+        if source_type in ['youtube', 'YouTube Video']:
+            if url:
+                st.markdown(f"🔗 [**Watch Video**]({url})")
+        elif source_type in ['web', 'link']:
+            if url:
+                st.markdown(f"🔗 [**Open Link**]({url})")
+        else:
+            # For documents, provide download if available
+            source_id = source.get('source_id', source.get('id'))
+            file_path = source.get('url_or_path', source.get('path'))
+            if source_id and file_path and not file_path.startswith('http'):
+                create_source_download_button(source_name, source_id, file_path, unique_key)
+        
+        if preview:
+            with st.expander(f"📝 Preview - Citation [{citation_num}]"):
+                st.text(preview)
+    
+    elif isinstance(source, str):
+        # Simple string format (fallback)
+        st.write(f"**{unique_key}. {source}**")
+    
+    else:
+        # Unknown format
+        st.write(f"**{unique_key}. {str(source)}**")
+
+
 def clear_chat():
     """Clear all chat messages from session state"""
     st.session_state.messages = []
@@ -405,6 +488,30 @@ def create_download_button(source: dict) -> bool:
             return True
     except Exception as e:
         st.error(f"Download error: {str(e)}")
+    
+    return False
+
+
+def create_source_download_button(source_name: str, source_id: str, file_path: str, unique_key: str) -> bool:
+    """Create download button for source files referenced in chat"""
+    try:
+        if file_path and Path(file_path).exists():
+            with open(file_path, 'rb') as f:
+                file_data = f.read()
+            
+            st.download_button(
+                label=f"📥 Download Source",
+                data=file_data,
+                file_name=source_name,
+                mime=get_mime_type(source_name),
+                key=f"source_download_{source_id}_{unique_key}_{int(time.time())}"
+            )
+            return True
+        elif file_path.startswith('http'):
+            st.markdown(f"🔗 [Open Link]({file_path})")
+            return True
+    except Exception as e:
+        st.error(f"Source download error: {str(e)}")
     
     return False
 
