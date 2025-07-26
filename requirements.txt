@@ -1,0 +1,43 @@
+# Core dependencies
+fastapi
+uvicorn[standard]
+streamlit
+
+# LangChain and LangGraph
+langchain
+langgraph
+langchain-openai
+
+# Vector Database
+chromadb
+
+# ML and NLP
+openai
+tiktoken
+
+# Document Processing
+PyPDF2
+python-docx
+pandas
+openpyxl
+
+# Web Scraping
+beautifulsoup4
+httpx
+requests
+
+# YouTube Processing
+yt-dlp
+
+# Utilities
+python-dotenv
+pydantic
+python-multipart
+aiofiles
+
+# Configuration
+pyyaml
+
+# Development
+pytest
+pytest-asyncio

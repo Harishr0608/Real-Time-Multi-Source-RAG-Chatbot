@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  rag-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./vectorstore:/app/vectorstore
+      - ./logs:/app/logs
+    command: ["uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  rag-frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+      - API_BASE_URL=http://rag-backend:8000/api/v1
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    command: ["streamlit", "run", "frontend/streamlit_app.py", "--server.address", "0.0.0.0"]
+    depends_on:
+      rag-backend:
+        condition: service_healthy
+
+volumes:
+  vectorstore:
+  app_data:
+  app_logs:

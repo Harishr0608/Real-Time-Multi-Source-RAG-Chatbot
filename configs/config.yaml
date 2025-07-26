@@ -1,0 +1,19 @@
+chunking:
+  max_tokens: ${MAX_CHUNK_TOKENS:500}
+  overlap: ${CHUNK_OVERLAP:50}
+
+retrieval:
+  top_k: ${TOP_K:5}
+  hybrid: true
+
+models:
+  llm: ${LLM_MODEL:gpt-3.5-turbo}
+  embedding: ${EMBED_MODEL:text-embedding-ada-002}
+
+files:
+  supported_types: [pdf, docx, xlsx, csv, txt, md, html, youtube, url]
+  max_size_mb: 20
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

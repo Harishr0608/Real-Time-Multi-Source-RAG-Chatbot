@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+WORKDIR /base
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ffmpeg \
+    libmagic-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies
+COPY docker/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app_user
+
+# Create necessary directories
+RUN mkdir -p /app/data/uploads /app/data/transcripts /app/data/chunks /app/data/metadata /app/logs /app/vectorstore
+RUN chown -R app_user:app_user /app
+
+USER app_user
