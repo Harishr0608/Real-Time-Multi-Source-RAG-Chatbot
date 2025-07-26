@@ -169,6 +169,6 @@ docker-compose logs rag-frontend
 tail -f logs/app.log
 ```
 
-## License
+## Screenshot
+<img width="1920" height="1132" alt="Screenshot 2025-07-26 at 22 41 41" src="https://github.com/user-attachments/assets/523207be-e5bd-40da-98d8-d0edabc57718" />
 
-MIT License - see LICENSE file for details.
