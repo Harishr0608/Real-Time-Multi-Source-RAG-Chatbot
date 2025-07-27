@@ -3,6 +3,7 @@ import os
 import openai
 import chromadb
 import httpx
+import time
 from dotenv import load_dotenv
 from typing import List, Dict, Any
 import asyncio
@@ -89,7 +90,7 @@ class RAGService:
                     logger.info("Collection exists but is empty, keeping it")
                     return
                     
-            except ValueError:
+            except chromadb.errors.NotFoundError:  # Fixed: Changed from ValueError to NotFoundError
                 # Collection doesn't exist
                 logger.info("Collection doesn't exist, creating new one")
             
@@ -118,18 +119,28 @@ class RAGService:
         try:
             logger.info(f"Retrieving chunks for question: {question[:100]}...")
             
-            # Ensure collection exists
-            if not hasattr(self, 'collection') or self.collection is None:
-                logger.warning("Collection not initialized, reinitializing...")
-                self._initialize_collection()
-            
-            # Check if collection has any documents
-            try:
-                count = self.collection.count()
-            except chromadb.errors.NotFoundError:
-                logger.warning("Collection was deleted, recreating...")
-                self._initialize_collection()
-                count = self.collection.count()
+            # Ensure collection exists with retry logic
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    if not hasattr(self, 'collection') or self.collection is None:
+                        logger.warning("Collection not initialized, reinitializing...")
+                        self._initialize_collection()
+                    
+                    # Check if collection has any documents
+                    count = self.collection.count()
+                    break  # Success, exit retry loop
+                    
+                except chromadb.errors.NotFoundError:
+                    logger.warning(f"Collection was deleted (attempt {attempt + 1}), recreating...")
+                    self._initialize_collection()
+                    count = self.collection.count()
+                    break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    logger.warning(f"Collection check failed (attempt {attempt + 1}): {e}")
+                    time.sleep(0.5)  # Brief delay before retry
             
             if count == 0:
                 logger.warning("Collection is empty, no documents to retrieve")
@@ -541,10 +552,26 @@ Reasoning:"""
                            ids: List[str], embeddings: List[List[float]]):
         """Add embeddings to the vector database with enhanced metadata"""
         try:
-            # Ensure collection exists
-            if not hasattr(self, 'collection') or self.collection is None:
-                logger.warning("Collection not initialized, reinitializing...")
-                self._initialize_collection()
+            # Ensure collection exists with retry logic
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    if not hasattr(self, 'collection') or self.collection is None:
+                        logger.warning("Collection not initialized, reinitializing...")
+                        self._initialize_collection()
+                    
+                    # Test collection accessibility
+                    _ = self.collection.count()
+                    break  # Success, exit retry loop
+                    
+                except chromadb.errors.NotFoundError:
+                    logger.warning(f"Collection was deleted (attempt {attempt + 1}), recreating...")
+                    self._initialize_collection()
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    logger.warning(f"Collection check failed (attempt {attempt + 1}): {e}")
+                    time.sleep(0.5)  # Brief delay before retry
             
             # Verify embedding dimensions
             if embeddings:
@@ -607,7 +634,11 @@ Reasoning:"""
                 logger.warning("Collection not initialized, no embeddings to delete")
                 return {"deleted_count": 0}
             
-            results = self.collection.get(where={"source_id": source_id})
+            try:
+                results = self.collection.get(where={"source_id": source_id})
+            except chromadb.errors.NotFoundError:
+                logger.warning("Collection doesn't exist, no embeddings to delete")
+                return {"deleted_count": 0}
             
             if results and results['ids']:
                 self.collection.delete(ids=results['ids'])
@@ -633,5 +664,7 @@ Reasoning:"""
                 "embedding_model": self.embed_model,
                 "expected_dimensions": self._get_embedding_dimensions()
             }
+        except chromadb.errors.NotFoundError:
+            return {"status": "collection_not_found", "error": "Collection 'documents' does not exist"}
         except Exception as e:
             return {"status": "error", "error": str(e)}
