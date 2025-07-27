@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment
+.env
+.env.local
+.env.production
+.venv
+env/
+venv/
+ENV/
+
+# Data
+data/uploads/*
+!data/uploads/.gitkeep
+data/transcripts/*
+!data/transcripts/.gitkeep
+data/chunks/*
+!data/chunks/.gitkeep
+data/metadata/*
+!data/metadata/.gitkeep
+
+# Vector Store
+vectorstore/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Streamlit
+.streamlit/
